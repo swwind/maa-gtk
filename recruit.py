@@ -166,22 +166,4 @@ class RecruitConfigBox(Gtk.Box):
 
         return config
 
-def default_recruit_config():
-    config = {
-        "refresh": False,
-        "select": [4],
-        "confirm": [3, 4],
-        "times": 4,
-        "set_time": True,
-        "expedite": False,
-        "expedite_times": 99999999,
-        "skip_robot": True,
-        "report_to_penguin": False,
-        "penguin_id": "",
-        "report_to_yituliu": False,
-        "yituliu_id": "",
-        "server": "CN",
-    }
-    return config
-
-__all__ = ['RecruitConfigBox', 'default_recruit_config']
+__all__ = ['RecruitConfigBox']

@@ -1,9 +1,9 @@
-from fight import FightConfigBox
 from gui import Gtk
-from recruit import RecruitConfigBox, default_recruit_config
 
 from roguelike import RoguelikeConfigBox
 from startup import StartUpConfigBox
+from recruit import RecruitConfigBox
+from fight import FightConfigBox
 
 class ItemList(Gtk.ListBox):
     def __init__(self, detail_panel):
@@ -34,7 +34,7 @@ class MainWindow(Gtk.Window):
         hbox = Gtk.Box(spacing=10)
         self.add(hbox)
 
-        detail_panel = RecruitConfigBox()
+        detail_panel = FightConfigBox()
         item_list = ItemList(detail_panel)
 
         hbox.pack_start(item_list, False, False, 0)

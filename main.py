@@ -34,7 +34,7 @@ class MainWindow(Gtk.Window):
         hbox = Gtk.Box(spacing=10)
         self.add(hbox)
 
-        detail_panel = FightConfigBox()
+        detail_panel = RoguelikeConfigBox()
         item_list = ItemList(detail_panel)
 
         hbox.pack_start(item_list, False, False, 0)

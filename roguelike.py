@@ -1,19 +1,5 @@
 from gui import Gtk
 
-themes = ["Phantom", "Mizuki", "Sami"]
-theme_names = [
-    "傀影与猩红血钻 - Phantom",
-    "水月与深蓝之树 - Mizuki",
-    "探索者的银凇止境 - Sami"
-]
-
-modes = [0, 1, 2]
-mode_names = [
-    "刷蜡烛，尽可能稳定地打更多层数",
-    "刷源石锭，第一层投资完就退出",
-    "【即将弃用】两者兼顾，投资过后再退出，没有投资就继续往后打"
-]
-
 class RoguelikeConfigBox(Gtk.Box):
     def __init__(self, config = {}):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=5)
@@ -26,12 +12,10 @@ class RoguelikeConfigBox(Gtk.Box):
         self.theme_label = Gtk.Label(label="肉鸽名称")
         self.theme_label.set_halign(Gtk.Align.END)
         self.theme_combo = Gtk.ComboBoxText()
-        for t in theme_names:
-            self.theme_combo.append_text(t)
-        try:
-            self.theme_combo.set_active(themes.index(config.get('theme', "Phantom")))
-        except:
-            self.theme_combo.set_active(0)
+        self.theme_combo.append("Phantom", "傀影与猩红血钻 - Phantom")
+        self.theme_combo.append("Mizuki", "水月与深蓝之树 - Mizuki")
+        self.theme_combo.append("Sami", "探索者的银凇止境 - Sami")
+        self.theme_combo.set_active_id(config.get("theme", "Phantom"))
         self.theme_combo.set_hexpand(True)
         grid.attach(self.theme_label, 0, 0, 1, 1)
         grid.attach(self.theme_combo, 1, 0, 1, 1)
@@ -40,12 +24,10 @@ class RoguelikeConfigBox(Gtk.Box):
         self.mode_label = Gtk.Label(label="模式")
         self.mode_label.set_halign(Gtk.Align.END)
         self.mode_combo = Gtk.ComboBoxText()
-        for t in mode_names:
-            self.mode_combo.append_text(t)
-        try:
-            self.mode_combo.set_active(modes.index(config.get("mode", 0)))
-        except:
-            self.mode_combo.set_active(0)
+        self.mode_combo.append("0", "刷蜡烛，尽可能稳定地打更多层数")
+        self.mode_combo.append("1", "刷源石锭，第一层投资完就退出")
+        self.mode_combo.append("2", "【即将弃用】两者兼顾，投资过后再退出，没有投资就继续往后打")
+        self.mode_combo.set_active_id(str(config.get("mode", 0)))
         self.mode_combo.set_hexpand(True)
         grid.attach(self.mode_label, 0, 1, 1, 1)
         grid.attach(self.mode_combo, 1, 1, 1, 1)
@@ -139,11 +121,11 @@ class RoguelikeConfigBox(Gtk.Box):
 
     def get_config(self):
         config = {
-            "theme": themes[self.theme_combo.get_active()],
-            "mode": modes[self.mode_combo.get_active()],
-            "starts_count": int(self.starts_count_spinbutton.get_text()),
+            "theme": self.theme_combo.get_active_id(),
+            "mode": self.mode_combo.get_active_id(),
+            "starts_count": self.starts_count_spinbutton.get_value_as_int(),
             "investment_enabled": self.investment_enabled_check.get_active(),
-            "investments_count": int(self.investments_count_spinbutton.get_text()),
+            "investments_count": self.investments_count_spinbutton.get_value_as_int(),
             "stop_when_investment_full": self.stop_when_investment_full_check.get_active(),
             "squad": self.squad_entry.get_text(),
             "roles": self.roles_entry.get_text(),

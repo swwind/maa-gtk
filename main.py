@@ -1,9 +1,9 @@
 from gui import Gtk
-from infrast import InfrastConfigBox
 
 from roguelike import RoguelikeConfigBox
 from startup import StartUpConfigBox
 from recruit import RecruitConfigBox
+from infrast import InfrastConfigBox
 from fight import FightConfigBox
 
 class ItemList(Gtk.ListBox):
@@ -12,7 +12,7 @@ class ItemList(Gtk.ListBox):
         self.set_size_request(200, -1)
         self.set_selection_mode(Gtk.SelectionMode.SINGLE)
 
-        items = ["Roguelike", "Fight"]
+        items = ["Roguelike", "StartUp", "Recruit", "Infrast", "Fight"]
         for item in items:
             row = Gtk.ListBoxRow()
             label = Gtk.Label(label=item)
@@ -24,7 +24,25 @@ class ItemList(Gtk.ListBox):
 
     def on_row_selected(self, _listbox, row):
         index = row.get_index()
-        print(f"选择了 {index}")
+
+        component = None
+        if index == 0:
+            component = RoguelikeConfigBox()
+        elif index == 1:
+            component = StartUpConfigBox()
+        elif index == 2:
+            component = RecruitConfigBox()
+        elif index == 3:
+            component = InfrastConfigBox()
+        elif index == 4:
+            component = FightConfigBox()
+        if component is not None:
+            children = self.detail_panel.get_children()
+            for child in children:
+                self.detail_panel.remove(child)
+                child.destroy()
+            self.detail_panel.add(component)
+            component.show_all()
 
 class MainWindow(Gtk.Window):
     def __init__(self):
@@ -35,7 +53,8 @@ class MainWindow(Gtk.Window):
         hbox = Gtk.Box(spacing=10)
         self.add(hbox)
 
-        detail_panel = InfrastConfigBox()
+        detail_panel = Gtk.Box(spacing=10)
+        detail_panel.add(StartUpConfigBox())
         item_list = ItemList(detail_panel)
 
         hbox.pack_start(item_list, False, False, 0)

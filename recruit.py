@@ -1,7 +1,6 @@
 from gui import Gtk
 
 stars = [1, 2, 3, 4, 5, 6]
-servers = ["CN", "US", "JP", "KR"]
 
 class RecruitConfigBox(Gtk.Box):
     def __init__(self, config = {}):
@@ -113,12 +112,11 @@ class RecruitConfigBox(Gtk.Box):
         self.server_label = Gtk.Label(label="服务器")
         self.server_label.set_halign(Gtk.Align.END)
         self.server_combo = Gtk.ComboBoxText()
-        for s in servers:
-            self.server_combo.append_text(s)
-        try:
-            self.server_combo.set_active(servers.index(config.get('server', "CN")))
-        except:
-            self.server_combo.set_active(0)
+        self.server_combo.append("CN", "CN")
+        self.server_combo.append("US", "US")
+        self.server_combo.append("JP", "JP")
+        self.server_combo.append("KR", "KR")
+        self.server_combo.set_active_id(config.get("server", "CN"))
         self.server_combo.set_hexpand(True)
         grid.attach(self.server_label, 0, 12, 1, 1)
         grid.attach(self.server_combo, 1, 12, 1, 1)
@@ -145,23 +143,21 @@ class RecruitConfigBox(Gtk.Box):
         self.server_label.set_sensitive(report_to_penguin or report_to_yituliu)
         self.server_combo.set_sensitive(report_to_penguin or report_to_yituliu)
 
-        print(self.get_config())
-
     def get_config(self):
         config = {
             "refresh": self.refresh_check.get_active(),
             "select": [stars[i] for i, checkbox in enumerate(self.select_checkboxes) if checkbox.get_active()],
             "confirm": [stars[i] for i, checkbox in enumerate(self.confirm_checkboxes) if checkbox.get_active()],
-            "times": int(self.times_spinbutton.get_text()),
+            "times": self.times_spinbutton.get_value_as_int(),
             "set_time": self.set_time_check.get_active(),
             "expedite": self.expedite_check.get_active(),
-            "expedite_times": int(self.expedite_times_spinbutton.get_text()),
+            "expedite_times": self.expedite_times_spinbutton.get_value_as_int(),
             "skip_robot": self.skip_robot_check.get_active(),
             "report_to_penguin": self.report_penguin_check.get_active(),
             "penguin_id": self.penguin_id_entry.get_text(),
             "report_to_yituliu": self.report_yituliu_check.get_active(),
             "yituliu_id": self.yituliu_id_entry.get_text(),
-            "server": servers[self.server_combo.get_active()],
+            "server": self.server_combo.get_active_id(),
         }
 
         return config

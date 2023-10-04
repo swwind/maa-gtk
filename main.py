@@ -1,4 +1,5 @@
 from gui import Gtk
+from infrast import InfrastConfigBox
 
 from roguelike import RoguelikeConfigBox
 from startup import StartUpConfigBox
@@ -34,7 +35,7 @@ class MainWindow(Gtk.Window):
         hbox = Gtk.Box(spacing=10)
         self.add(hbox)
 
-        detail_panel = StartUpConfigBox()
+        detail_panel = InfrastConfigBox()
         item_list = ItemList(detail_panel)
 
         hbox.pack_start(item_list, False, False, 0)

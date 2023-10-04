@@ -1,11 +1,10 @@
 from gui import Gtk
-import functools
 
 stars = [1, 2, 3, 4, 5, 6]
 servers = ["CN", "US", "JP", "KR"]
 
 class RecruitConfigBox(Gtk.Box):
-    def __init__(self, config):
+    def __init__(self, config = {}):
         Gtk.Box.__init__(self, orientation=Gtk.Orientation.VERTICAL, spacing=5)
 
         grid = Gtk.Grid()
@@ -124,11 +123,11 @@ class RecruitConfigBox(Gtk.Box):
         grid.attach(self.server_label, 0, 12, 1, 1)
         grid.attach(self.server_combo, 1, 12, 1, 1)
 
-        self.expedite_check.connect("toggled", self.on_expedite_toggled)
+        self.expedite_check.connect("toggled", self.update_sensitive)
         self.report_penguin_check.connect("toggled", self.update_sensitive)
         self.report_yituliu_check.connect("toggled", self.update_sensitive)
 
-        self.update_sensitive()
+        self.update_sensitive(None)
 
         self.add(grid)
 

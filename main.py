@@ -1,5 +1,7 @@
+import threading
 import webbrowser
 import gi
+
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
 
@@ -13,10 +15,12 @@ from infrast import InfrastConfigBox
 from fight import FightConfigBox
 from award import AwardConfigBox
 from mall import MallConfigBox
+from maa import start_tasks
 
-from config import EditConfigDialog, read_maa_gtk_config, save_maa_gtk_config
+from config import read_maa_gtk_config, save_maa_gtk_config
+from edit import EditConfigDialog
 
-items = [
+task_types = [
     ["启动游戏", "StartUp"],
     ["关闭游戏", "CloseDown"],
     ["自动刷图", "Fight"],
@@ -60,7 +64,7 @@ class CreateTaskDialog(Gtk.Dialog):
         self.task_type_label.set_halign(Gtk.Align.END)
         self.task_type_combo = Gtk.ComboBoxText()
         self.task_type_combo.set_hexpand(True)
-        for mname, mtype in items:
+        for mname, mtype in task_types:
             self.task_type_combo.append(mtype, f"{mname} - {mtype}")
         self.task_type_combo.connect("changed", self.update_config_panel)
         self.task_type_combo.set_active_id(self.default_type)
@@ -201,6 +205,10 @@ class MainWindow(Gtk.Window):
         button5.connect('clicked', self.remove_task)
         self.button_box.pack_start(button5, True, True, 0)
 
+        button6 = Gtk.Button(label="开始")
+        button6.connect('clicked', self.start_tasks)
+        self.button_box.pack_start(button6, True, True, 0)
+
         self.last_selected_row = None
 
         self.connect("destroy", Gtk.main_quit)
@@ -304,7 +312,18 @@ class MainWindow(Gtk.Window):
         self.last_selected_row = None
         row.destroy()
 
-# test_connection(read_maa_gtk_config())
+    def start_tasks(self, _):
+        self.set_sensitive(False)
+        thread = threading.Thread(target=start_tasks,
+                                  args=(self.tasks, self.config, self.on_running_output, self.on_running_finish))
+        thread.start()
+
+    def on_running_output(self, output):
+        print(output)
+
+    def on_running_finish(self):
+        print('finish')
+        self.set_sensitive(True)
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)

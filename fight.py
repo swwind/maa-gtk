@@ -93,11 +93,8 @@ class FightConfigBox(Gtk.Box):
         self.server_label.set_halign(Gtk.Align.END)
         self.server_combo = Gtk.ComboBoxText()
         for s in servers:
-            self.server_combo.append_text(s)
-        try:
-            self.server_combo.set_active(servers.index(config.get("server", "CN")))
-        except:
-            self.server_combo.set_active(0)
+            self.server_combo.append(s, s)
+        self.server_combo.set_active_id(config.get("server", "CN"))
         self.server_combo.set_hexpand(True)
         grid.attach(self.server_label, 0, 8, 1, 1)
         grid.attach(self.server_combo, 1, 8, 1, 1)
@@ -107,11 +104,8 @@ class FightConfigBox(Gtk.Box):
         self.client_type_label.set_halign(Gtk.Align.END)
         self.client_type_combo = Gtk.ComboBoxText()
         for t in client_types:
-            self.client_type_combo.append_text(t)
-        try:
-            self.client_type_combo.set_active(client_types.index(config.get("client_type", "Official")))
-        except:
-            self.client_type_combo.set_active(0)
+            self.client_type_combo.append(t, t)
+        self.client_type_combo.set_active_id(config.get("client_type", "Official"))
         self.client_type_combo.set_hexpand(True)
         grid.attach(self.client_type_label, 0, 9, 1, 1)
         grid.attach(self.client_type_combo, 1, 9, 1, 1)
@@ -137,13 +131,14 @@ class FightConfigBox(Gtk.Box):
     def get_config(self):
         config = {
             "stage": self.stage_entry.get_text(),
-            "medicine": int(self.medicine_spin.get_text()),
-            "expiring_medicine": int(self.expiring_medicine_spin.get_text()),
-            "stone": int(self.stone_spin.get_text()),
+            "medicine": self.medicine_spin.get_value_as_int(),
+            "expiring_medicine": self.expiring_medicine_spin.get_value_as_int(),
+            "times": self.times_spin.get_value_as_int(),
+            "stone": self.stone_spin.get_value_as_int(),
             "report_to_penguin": self.report_to_penguin_check.get_active(),
             "penguin_id": self.penguin_id_entry.get_text(),
-            "server": servers[self.server_combo.get_active()],
-            "client_type": client_types[self.client_type_combo.get_active()],
+            "server": self.server_combo.get_active_id(),
+            "client_type": self.client_type_combo.get_active_id(),
             "DrGrandet": self.drgrandet_check.get_active()
         }
 

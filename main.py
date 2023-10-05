@@ -2,9 +2,11 @@ from gui import Gtk
 
 from roguelike import RoguelikeConfigBox
 from startup import StartUpConfigBox
+from closedown import CloseDownConfigBox
 from recruit import RecruitConfigBox
 from infrast import InfrastConfigBox
 from fight import FightConfigBox
+from award import AwardConfigBox
 
 items = [
     ["启动游戏", "StartUp"],
@@ -72,7 +74,7 @@ class CreateTaskDialog(Gtk.Dialog):
         if type == "StartUp":
             self.component = StartUpConfigBox()
         elif type == "CloseDown":
-            pass
+            self.component = CloseDownConfigBox()
         elif type == "Fight":
             self.component = FightConfigBox()
         elif type == "Recruit":
@@ -82,7 +84,7 @@ class CreateTaskDialog(Gtk.Dialog):
         elif type == "Mall":
             pass
         elif type == "Award":
-            pass
+            self.component = AwardConfigBox()
         elif type == "Roguelike":
             self.component = RoguelikeConfigBox()
         elif type == "Copilot":
@@ -99,6 +101,7 @@ class CreateTaskDialog(Gtk.Dialog):
     def on_response(self, _, response_id):
         if response_id == Gtk.ResponseType.OK:
             self.type = items[self.listbox.get_selected_row().get_index()][1]
+            self.name = self.name_entry.get_text()
             self.config = self.component.get_config()
 
 class MainWindow(Gtk.Window):
@@ -109,13 +112,14 @@ class MainWindow(Gtk.Window):
         button.connect("clicked", self.create_new_task)
         self.add(button)
 
-    def create_new_task(self, button):
+    def create_new_task(self, _):
         dialog = CreateTaskDialog(self)
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
             print('OK')
             print(dialog.type)
+            print(dialog.name)
             print(dialog.config)
         elif response == Gtk.ResponseType.CANCEL:
             print('Cancel')

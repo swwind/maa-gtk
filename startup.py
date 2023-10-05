@@ -61,5 +61,3 @@ class StartUpConfigBox(Gtk.Box):
         if self.account_name_usage_checkbox.get_active():
             config["account_name"] = self.account_name_entry.get_text()
         return config
-
-__all__ = ['StartUpConfigBox']

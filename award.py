@@ -8,5 +8,3 @@ class AwardConfigBox(Gtk.Box):
 
     def get_config(self):
         return {}
-
-__all__ = ['AwardConfigBox']

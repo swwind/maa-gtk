@@ -8,5 +8,3 @@ class CloseDownConfigBox(Gtk.Box):
 
     def get_config(self):
         return {}
-
-__all__ = ['CloseDownConfigBox']

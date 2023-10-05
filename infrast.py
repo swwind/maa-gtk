@@ -86,5 +86,3 @@ class InfrastConfigBox(Gtk.Box):
             "dorm_trust_enabled": self.dorm_trust_enabled_check.get_active(),
         }
         return config
-
-__all__ = ['InfrastConfigBox']

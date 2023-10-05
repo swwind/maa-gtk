@@ -48,5 +48,3 @@ class MallConfigBox(Gtk.Box):
             "force_shopping_if_credit_full": self.force_shopping_check.get_active(),
         }
         return config
-
-__all__ = ['MallConfigBox']

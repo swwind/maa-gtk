@@ -72,5 +72,3 @@ class SSSCopilotConfigBox(Gtk.Box):
             "loop_times": self.loop_times_spin.get_value_as_int()
         }
         return config
-
-__all__ = ['SSSCopilotConfigBox']

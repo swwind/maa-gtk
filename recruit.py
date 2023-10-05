@@ -161,5 +161,3 @@ class RecruitConfigBox(Gtk.Box):
         }
 
         return config
-
-__all__ = ['RecruitConfigBox']

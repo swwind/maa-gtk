@@ -58,5 +58,3 @@ class CopilotConfigBox(Gtk.Box):
             "formation": self.formation_check.get_active()
         }
         return config
-
-__all__ = ['CopilotConfigBox']

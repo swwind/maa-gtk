@@ -136,5 +136,3 @@ class RoguelikeConfigBox(Gtk.Box):
         }
 
         return config
-
-__all__ = ['RoguelikeConfigBox']

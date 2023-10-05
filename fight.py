@@ -148,5 +148,3 @@ class FightConfigBox(Gtk.Box):
         }
 
         return config
-
-__all__ = ['FightConfigBox']

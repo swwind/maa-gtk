@@ -47,7 +47,7 @@ class SSSCopilotConfigBox(Gtk.Box):
 
     def on_file_button_clicked(self, widget):
         dialog = Gtk.FileChooserDialog(
-            title="选择作业 JSON 文件",
+            title="选择作业文件",
             parent=None,
             action=Gtk.FileChooserAction.OPEN
         )

@@ -1,3 +1,4 @@
+import webbrowser
 import gi
 gi.require_version('Gtk', '3.0')
 from gi.repository import Gtk
@@ -12,6 +13,8 @@ from infrast import InfrastConfigBox
 from fight import FightConfigBox
 from award import AwardConfigBox
 from mall import MallConfigBox
+
+from config import EditConfigDialog, read_maa_gtk_config, save_maa_gtk_config, test_connection
 
 items = [
     ["启动游戏", "StartUp"],
@@ -122,15 +125,44 @@ class MainWindow(Gtk.Window):
         Gtk.Window.__init__(self, title="MAA GTK")
         self.set_default_size(335, 518)
         self.tasks = []  # 初始化任务列表
+        self.config = read_maa_gtk_config()
 
-        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
-        vbox.set_border_width(10)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=0)
         self.add(vbox)
+
+        self.menubar = Gtk.MenuBar()
+        vbox.pack_start(self.menubar, False, False, 0)
+
+        filem = Gtk.MenuItem(label="选项")
+        filemenu = Gtk.Menu()
+        filem.set_submenu(filemenu)
+        self.menubar.append(filem)
+
+        configb = Gtk.MenuItem(label="设置")
+        configb.connect('activate', self.open_edit_config_page)
+        filemenu.append(configb)
+
+        exitb = Gtk.MenuItem(label="退出")
+        exitb.connect('activate', Gtk.main_quit)
+        filemenu.append(exitb)
+
+        aboutm = Gtk.MenuItem(label="关于")
+        aboutmenu = Gtk.Menu()
+        aboutm.set_submenu(aboutmenu)
+        self.menubar.append(aboutm)
+
+        configb = Gtk.MenuItem(label="GitHub...")
+        configb.connect('activate', self.open_github_page)
+        aboutmenu.append(configb)
+
+        innerbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        innerbox.set_border_width(10)
+        vbox.pack_start(innerbox, True, True, 0)
 
         # 创建一个 ListBox 来展示任务列表
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-        vbox.pack_start(self.listbox, True, True, 0)
+        innerbox.pack_start(self.listbox, True, True, 0)
 
         # 添加任务项到 ListBox
         for task in self.tasks:
@@ -141,7 +173,7 @@ class MainWindow(Gtk.Window):
 
         # 创建一个按钮 Box
         self.button_box = Gtk.Box()
-        vbox.pack_start(self.button_box, False, False, 0)
+        innerbox.pack_start(self.button_box, False, False, 0)
 
         button1 = Gtk.Button(label="添加")
         button1.connect("clicked", self.create_new_task)
@@ -163,6 +195,20 @@ class MainWindow(Gtk.Window):
 
         self.last_selected_row = None
 
+        self.connect("destroy", Gtk.main_quit)
+        self.show_all()
+
+    def open_edit_config_page(self, _):
+        dialog = EditConfigDialog(self, self.config or {})
+        response = dialog.run()
+        if response == Gtk.ResponseType.OK:
+            self.config = dialog.config
+            save_maa_gtk_config(self.config)
+        dialog.destroy()
+
+    def open_github_page(self, _):
+        webbrowser.open("https://github.com")
+
     def create_new_task(self, _):
         dialog = CreateTaskDialog(self, name = f"任务 {len(self.tasks) + 1}")
         response = dialog.run()
@@ -181,9 +227,6 @@ class MainWindow(Gtk.Window):
             self.listbox.add(row)
 
             self.show_all()
-
-        elif response == Gtk.ResponseType.CANCEL:
-            print('Cancel')
 
         dialog.destroy()
 
@@ -228,6 +271,8 @@ class MainWindow(Gtk.Window):
         self.listbox.remove(row)
         self.listbox.insert(row, index+1)
         self.last_selected_row = row
+
+# test_connection(read_maa_gtk_config())
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)

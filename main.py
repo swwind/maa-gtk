@@ -14,7 +14,7 @@ from fight import FightConfigBox
 from award import AwardConfigBox
 from mall import MallConfigBox
 
-from config import EditConfigDialog, read_maa_gtk_config, save_maa_gtk_config, test_connection
+from config import EditConfigDialog, read_maa_gtk_config, save_maa_gtk_config
 
 items = [
     ["启动游戏", "StartUp"],
@@ -30,44 +30,45 @@ items = [
 ]
 
 class CreateTaskDialog(Gtk.Dialog):
-    def __init__(self, parent, name = "新建任务"):
+    def __init__(self, parent, name = "新建任务", default_type = "StartUp", default_config = {}):
         Gtk.Dialog.__init__(self, "创建新任务", parent, 0, Gtk.ButtonsType.NONE)
         self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK,
                          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
         self.set_default_size(954, 518)
         self.set_border_width(10)
 
+        self.default_type = default_type
+        self.default_config = default_config
+
         vbox = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
-        hbox = Gtk.Box(spacing=10)
-
-        self.right_box = Gtk.Box(spacing=10)
-
-        # 创建一个ListBox，并添加一些项目
-        self.listbox = Gtk.ListBox()
-        self.listbox.set_size_request(200, -1)
-        self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
-
-        for mname, mtype in items:
-            row = Gtk.ListBoxRow()
-            label = Gtk.Label(label=f"{mname} - {mtype}")
-            row.add(label)
-            self.listbox.add(row)
-        self.listbox.connect("row-selected", self.on_row_selected)
-        self.listbox.select_row(self.listbox.get_row_at_index(0))
-
-        hbox.pack_start(self.listbox, False, False, 0)
-        hbox.pack_start(self.right_box, True, True, 0)
+        grid = Gtk.Grid()
+        grid.set_column_spacing(10)
+        grid.set_row_spacing(5)
 
         self.name_label = Gtk.Label(label="任务名称")
+        self.name_label.set_halign(Gtk.Align.END)
         self.name_entry = Gtk.Entry()
         self.name_entry.set_text(name)
         self.name_entry.set_hexpand(True)
-        self.name_box = Gtk.Box(spacing=10)
-        self.name_box.add(self.name_label)
-        self.name_box.add(self.name_entry)
+        grid.attach(self.name_label, 0, 0, 1, 1)
+        grid.attach(self.name_entry, 1, 0, 1, 1)
 
-        vbox.pack_start(self.name_box, False, False, 0)
-        vbox.pack_start(hbox, True, True, 0)
+        self.right_box = Gtk.Box(spacing=10)
+
+        # 创建一个 ComboBoxText，并添加一些项目
+        self.task_type_label = Gtk.Label(label="任务类型")
+        self.task_type_label.set_halign(Gtk.Align.END)
+        self.task_type_combo = Gtk.ComboBoxText()
+        self.task_type_combo.set_hexpand(True)
+        for mname, mtype in items:
+            self.task_type_combo.append(mtype, f"{mname} - {mtype}")
+        self.task_type_combo.connect("changed", self.update_config_panel)
+        self.task_type_combo.set_active_id(self.default_type)
+        grid.attach(self.task_type_label, 0, 1, 1, 1)
+        grid.attach(self.task_type_combo, 1, 1, 1, 1)
+
+        vbox.pack_start(grid, False, False, 0)
+        vbox.pack_start(self.right_box, True, True, 0)
 
         area = self.get_content_area()
         area.pack_start(vbox, True, True, 0)
@@ -75,30 +76,32 @@ class CreateTaskDialog(Gtk.Dialog):
         self.connect('response', self.on_response)
         self.show_all()
 
-    def on_row_selected(self, _, row):
-        type = items[row.get_index()][1]
+    def update_config_panel(self, _):
+        type = self.task_type_combo.get_active_id()
         self.component = None
+        config = self.default_config or {}
+        self.default_config = None
 
         if type == "StartUp":
-            self.component = StartUpConfigBox()
+            self.component = StartUpConfigBox(config)
         elif type == "CloseDown":
-            self.component = CloseDownConfigBox()
+            self.component = CloseDownConfigBox(config)
         elif type == "Fight":
-            self.component = FightConfigBox()
+            self.component = FightConfigBox(config)
         elif type == "Recruit":
-            self.component = RecruitConfigBox()
+            self.component = RecruitConfigBox(config)
         elif type == "Infrast":
-            self.component = InfrastConfigBox()
+            self.component = InfrastConfigBox(config)
         elif type == "Mall":
-            self.component = MallConfigBox()
+            self.component = MallConfigBox(config)
         elif type == "Award":
-            self.component = AwardConfigBox()
+            self.component = AwardConfigBox(config)
         elif type == "Roguelike":
-            self.component = RoguelikeConfigBox()
+            self.component = RoguelikeConfigBox(config)
         elif type == "Copilot":
-            self.component = CopilotConfigBox()
+            self.component = CopilotConfigBox(config)
         elif type == "SSSCopilot":
-            self.component = SSSCopilotConfigBox()
+            self.component = SSSCopilotConfigBox(config)
 
         if self.component is not None:
             children = self.right_box.get_children()
@@ -110,7 +113,7 @@ class CreateTaskDialog(Gtk.Dialog):
 
     def on_response(self, _, response_id):
         if response_id == Gtk.ResponseType.OK:
-            self.type = items[self.listbox.get_selected_row().get_index()][1]
+            self.type = self.task_type_combo.get_active_id()
             self.name = self.name_entry.get_text()
             self.config = self.component.get_config()
 
@@ -183,6 +186,7 @@ class MainWindow(Gtk.Window):
         self.button_box.pack_start(button1, True, True, 0)
 
         button2 = Gtk.Button(label="编辑")
+        button2.connect("clicked", self.edit_task)
         self.button_box.pack_start(button2, True, True, 0)
 
         button3 = Gtk.Button(label="上移")
@@ -211,7 +215,7 @@ class MainWindow(Gtk.Window):
         dialog.destroy()
 
     def open_github_page(self, _):
-        webbrowser.open("https://github.com")
+        webbrowser.open("https://github.com/swwind/maa-gtk")
 
     def create_new_task(self, _):
         dialog = CreateTaskDialog(self, name = f"任务 {len(self.tasks) + 1}")
@@ -234,18 +238,32 @@ class MainWindow(Gtk.Window):
 
         dialog.destroy()
 
+    def edit_task(self, _):
+        row = self.listbox.get_selected_row() or self.last_selected_row
+        if row is None: return
+        index = row.get_index()
+        task = self.tasks[index]
+
+        dialog = CreateTaskDialog(self, name=task.name, default_type=task.type, default_config=task.config)
+        response = dialog.run()
+
+        if response == Gtk.ResponseType.OK:
+            task = Task(
+                name=dialog.name,
+                type=dialog.type,
+                config=dialog.config)
+            self.tasks[index] = task
+            row.get_children()[0].set_text(task.name)
+            self.show_all()
+
+        dialog.destroy()
+
     def move_task_up(self, _):
         # 实现将当前选中的任务提前的代码逻辑
         row = self.listbox.get_selected_row() or self.last_selected_row
-
-        # 如果还没有选择，那么返回
-        if row is None:
-            return
-
-        # 如果当前选中的是第一个任务项，则无法再往前移动
+        if row is None: return
         index = row.get_index()
-        if index == 0:
-            return
+        if index == 0: return
 
         # 将当前选中的任务项和它的前一个任务项交换位置
         self.tasks[index], self.tasks[index-1] = self.tasks[index-1], self.tasks[index]

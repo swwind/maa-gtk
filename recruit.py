@@ -1,4 +1,4 @@
-from gui import Gtk
+from gi.repository import Gtk
 
 stars = [1, 2, 3, 4, 5, 6]
 

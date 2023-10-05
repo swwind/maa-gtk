@@ -1,4 +1,4 @@
-from gui import Gtk
+from gi.repository import Gtk
 
 class RoguelikeConfigBox(Gtk.Box):
     def __init__(self, config = {}):

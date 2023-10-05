@@ -1,12 +1,17 @@
-from gui import Gtk
+import gi
+gi.require_version('Gtk', '3.0')
+from gi.repository import Gtk
 
+from ssscopilot import SSSCopilotConfigBox
 from roguelike import RoguelikeConfigBox
-from startup import StartUpConfigBox
 from closedown import CloseDownConfigBox
+from startup import StartUpConfigBox
+from copilot import CopilotConfigBox
 from recruit import RecruitConfigBox
 from infrast import InfrastConfigBox
 from fight import FightConfigBox
 from award import AwardConfigBox
+from mall import MallConfigBox
 
 items = [
     ["启动游戏", "StartUp"],
@@ -16,12 +21,13 @@ items = [
     ["基建换班", "Infrast"],
     ["信用商店", "Mall"],
     ["任务奖励", "Award"],
-    ["自动刷肉鸽", "Roguelike"],
-    ["自动抄作业", "Copilot"],
+    ["刷肉鸽", "Roguelike"],
+    ["抄作业", "Copilot"],
+    ["保全派驻", "SSSCopilot"],
 ]
 
 class CreateTaskDialog(Gtk.Dialog):
-    def __init__(self, parent):
+    def __init__(self, parent, name = "新建任务", type = "StartUp", config = {}):
         Gtk.Dialog.__init__(self, "创建新任务", parent, 0, Gtk.ButtonsType.NONE)
         self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK,
                          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
@@ -38,12 +44,11 @@ class CreateTaskDialog(Gtk.Dialog):
         self.listbox.set_size_request(200, -1)
         self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
 
-        for name, type in items:
+        for name, mtype in items:
             row = Gtk.ListBoxRow()
-            label = Gtk.Label(label=f"{name} - {type}")
+            label = Gtk.Label(label=f"{name} - {mtype}")
             row.add(label)
             self.listbox.add(row)
-
         self.listbox.connect("row-selected", self.on_row_selected)
         self.listbox.select_row(self.listbox.get_row_at_index(0))
 
@@ -82,13 +87,15 @@ class CreateTaskDialog(Gtk.Dialog):
         elif type == "Infrast":
             self.component = InfrastConfigBox()
         elif type == "Mall":
-            pass
+            self.component = MallConfigBox()
         elif type == "Award":
             self.component = AwardConfigBox()
         elif type == "Roguelike":
             self.component = RoguelikeConfigBox()
         elif type == "Copilot":
-            pass
+            self.component = CopilotConfigBox()
+        elif type == "SSSCopilot":
+            self.component = SSSCopilotConfigBox()
 
         if self.component is not None:
             children = self.right_box.get_children()

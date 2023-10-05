@@ -1,4 +1,4 @@
-from gui import Gtk
+from gi.repository import Gtk
 
 servers = ["CN", "US", "JP", "KR"]
 client_types = ["Official", "Bilibili", "txwy", "YoStarEN", "YoStarJP", "YoStarKR"]

@@ -27,7 +27,7 @@ items = [
 ]
 
 class CreateTaskDialog(Gtk.Dialog):
-    def __init__(self, parent, name = "新建任务", type = "StartUp", config = {}):
+    def __init__(self, parent, name = "新建任务"):
         Gtk.Dialog.__init__(self, "创建新任务", parent, 0, Gtk.ButtonsType.NONE)
         self.add_buttons(Gtk.STOCK_OK, Gtk.ResponseType.OK,
                          Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
@@ -44,9 +44,9 @@ class CreateTaskDialog(Gtk.Dialog):
         self.listbox.set_size_request(200, -1)
         self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
 
-        for name, mtype in items:
+        for mname, mtype in items:
             row = Gtk.ListBoxRow()
-            label = Gtk.Label(label=f"{name} - {mtype}")
+            label = Gtk.Label(label=f"{mname} - {mtype}")
             row.add(label)
             self.listbox.add(row)
         self.listbox.connect("row-selected", self.on_row_selected)
@@ -57,6 +57,7 @@ class CreateTaskDialog(Gtk.Dialog):
 
         self.name_label = Gtk.Label(label="任务名称")
         self.name_entry = Gtk.Entry()
+        self.name_entry.set_text(name)
         self.name_entry.set_hexpand(True)
         self.name_box = Gtk.Box(spacing=10)
         self.name_box.add(self.name_label)
@@ -115,7 +116,7 @@ class MainWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="MAA GTK")
 
-        button = Gtk.Button(label="点击我啊")
+        button = Gtk.Button(label="点击添加任务")
         button.connect("clicked", self.create_new_task)
         self.add(button)
 

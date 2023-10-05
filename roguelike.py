@@ -122,7 +122,7 @@ class RoguelikeConfigBox(Gtk.Box):
     def get_config(self):
         config = {
             "theme": self.theme_combo.get_active_id(),
-            "mode": self.mode_combo.get_active_id(),
+            "mode": int(self.mode_combo.get_active_id()),
             "starts_count": self.starts_count_spinbutton.get_value_as_int(),
             "investment_enabled": self.investment_enabled_check.get_active(),
             "investments_count": self.investments_count_spinbutton.get_value_as_int(),

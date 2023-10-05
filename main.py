@@ -6,27 +6,16 @@ from recruit import RecruitConfigBox
 from infrast import InfrastConfigBox
 from fight import FightConfigBox
 
-types = [
-    "StartUp",
-    "CloseDown",
-    "Fight",
-    "Recruit",
-    "Infrast",
-    "Mall",
-    "Award",
-    "Roguelike",
-    "Copilot",
-]
 items = [
-    "启动游戏 - StartUp",
-    "关闭游戏 - CloseDown",
-    "自动刷图 - Fight",
-    "公开招募 - Recruit",
-    "基建换班 - Infrast",
-    "信用商店 - Mall",
-    "任务奖励 - Award",
-    "自动刷肉鸽 - Roguelike",
-    "自动抄作业 - Copilot",
+    ["启动游戏", "StartUp"],
+    ["关闭游戏", "CloseDown"],
+    ["自动刷图", "Fight"],
+    ["公开招募", "Recruit"],
+    ["基建换班", "Infrast"],
+    ["信用商店", "Mall"],
+    ["任务奖励", "Award"],
+    ["自动刷肉鸽", "Roguelike"],
+    ["自动抄作业", "Copilot"],
 ]
 
 class CreateTaskDialog(Gtk.Dialog):
@@ -37,6 +26,7 @@ class CreateTaskDialog(Gtk.Dialog):
         self.set_default_size(954, 518)
         self.set_border_width(10)
 
+        vbox = Gtk.Box(spacing=10, orientation=Gtk.Orientation.VERTICAL)
         hbox = Gtk.Box(spacing=10)
 
         self.right_box = Gtk.Box(spacing=10)
@@ -46,25 +36,36 @@ class CreateTaskDialog(Gtk.Dialog):
         self.listbox.set_size_request(200, -1)
         self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
 
-        for item in items:
+        for name, type in items:
             row = Gtk.ListBoxRow()
-            label = Gtk.Label(label=item)
+            label = Gtk.Label(label=f"{name} - {type}")
             row.add(label)
             self.listbox.add(row)
 
         self.listbox.connect("row-selected", self.on_row_selected)
+        self.listbox.select_row(self.listbox.get_row_at_index(0))
 
         hbox.pack_start(self.listbox, False, False, 0)
         hbox.pack_start(self.right_box, True, True, 0)
 
+        self.name_label = Gtk.Label(label="任务名称")
+        self.name_entry = Gtk.Entry()
+        self.name_entry.set_hexpand(True)
+        self.name_box = Gtk.Box(spacing=10)
+        self.name_box.add(self.name_label)
+        self.name_box.add(self.name_entry)
+
+        vbox.pack_start(self.name_box, False, False, 0)
+        vbox.pack_start(hbox, True, True, 0)
+
         area = self.get_content_area()
-        area.pack_start(hbox, True, True, 0)
+        area.pack_start(vbox, True, True, 0)
 
         self.connect('response', self.on_response)
         self.show_all()
 
     def on_row_selected(self, _, row):
-        type = types[row.get_index()]
+        type = items[row.get_index()][1]
         print(row.get_index(), type)
         self.component = None
 
@@ -97,7 +98,7 @@ class CreateTaskDialog(Gtk.Dialog):
 
     def on_response(self, _, response_id):
         if response_id == Gtk.ResponseType.OK:
-            self.type = types[self.listbox.get_selected_row().get_index()]
+            self.type = items[self.listbox.get_selected_row().get_index()][1]
             self.config = self.component.get_config()
 
 class MainWindow(Gtk.Window):

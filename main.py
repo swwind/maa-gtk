@@ -159,6 +159,9 @@ class MainWindow(Gtk.Window):
         innerbox.set_border_width(10)
         vbox.pack_start(innerbox, True, True, 0)
 
+        task_list_label = Gtk.Label(label="任务列表")
+        innerbox.pack_start(task_list_label, False, False, 0)
+
         # 创建一个 ListBox 来展示任务列表
         self.listbox = Gtk.ListBox()
         self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
@@ -191,6 +194,7 @@ class MainWindow(Gtk.Window):
         self.button_box.pack_start(button4, True, True, 0)
 
         button5 = Gtk.Button(label="删除")
+        button5.connect('clicked', self.remove_task)
         self.button_box.pack_start(button5, True, True, 0)
 
         self.last_selected_row = None
@@ -271,6 +275,16 @@ class MainWindow(Gtk.Window):
         self.listbox.remove(row)
         self.listbox.insert(row, index+1)
         self.last_selected_row = row
+
+    def remove_task(self, _):
+        row = self.listbox.get_selected_row() or self.last_selected_row
+        if row is None:
+            return
+        index = row.get_index()
+        del self.tasks[index]
+        self.listbox.remove(row)
+        self.last_selected_row = None
+        row.destroy()
 
 # test_connection(read_maa_gtk_config())
 

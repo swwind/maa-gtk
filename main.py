@@ -213,7 +213,7 @@ class MainWindow(Gtk.Window):
         self.button_box.pack_start(self.button6, True, True, 0)
 
         self.last_selected_row = None
-        self.status_dialog = None
+        self.status_dialog = StatusDialog(self)
         self.process = None
 
         self.connect("destroy", Gtk.main_quit)
@@ -228,10 +228,8 @@ class MainWindow(Gtk.Window):
         dialog.destroy()
 
     def open_status_dialog(self, _):
-        if self.status_dialog is not None:
-            self.status_dialog.destroy()
-        self.status_dialog = StatusDialog(self)
-        self.status_dialog.show()
+        if not self.status_dialog.is_visible():
+            self.status_dialog.show()
 
     def open_github_page(self, _):
         webbrowser.open("https://github.com/swwind/maa-gtk")

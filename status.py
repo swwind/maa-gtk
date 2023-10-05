@@ -15,7 +15,16 @@ class StatusDialog(Gtk.Dialog):
 
         area = self.get_content_area()
         area.pack_start(scrollbar, True, True, 0)
+        area.show_all()
 
+        self.connect("delete-event", self.on_delete_event)
+
+    def on_delete_event(self, window, event):
+        self.hide()
+        return True
+
+    def show_show(self):
+        self.get_content_area().show_all()
         self.show_all()
 
     def add_text(self, text):

@@ -2,8 +2,9 @@ import threading
 import webbrowser
 import gi
 
+
 gi.require_version('Gtk', '3.0')
-from gi.repository import Gtk
+from gi.repository import Gtk, GLib
 
 from ssscopilot import SSSCopilotConfigBox
 from roguelike import RoguelikeConfigBox
@@ -16,7 +17,7 @@ from fight import FightConfigBox
 from award import AwardConfigBox
 from mall import MallConfigBox
 from maa import start_tasks
-
+from status import StatusDialog
 from config import read_maa_gtk_config, save_maa_gtk_config
 from edit import EditConfigDialog
 
@@ -314,15 +315,26 @@ class MainWindow(Gtk.Window):
 
     def start_tasks(self, _):
         self.set_sensitive(False)
+        self.status_dialog = StatusDialog(self)
+        self.status_dialog.show()
+        self.status_dialog.add_text("任务开始")
         thread = threading.Thread(target=start_tasks,
                                   args=(self.tasks, self.config, self.on_running_output, self.on_running_finish))
         thread.start()
 
-    def on_running_output(self, output):
-        print(output)
 
-    def on_running_finish(self):
-        print('finish')
+    def on_running_output(self, output):
+        GLib.idle_add(self.on_running_output_in_main_thread, output)
+    def on_running_output_in_main_thread(self, output):
+        self.status_dialog.add_text(output)
+
+    def on_running_finish(self, returncode):
+        GLib.idle_add(self.on_running_finish_in_main_thread, returncode)
+    def on_running_finish_in_main_thread(self, returncode):
+        if returncode == 0:
+            self.status_dialog.add_text(f"任务完成")
+        else:
+            self.status_dialog.add_text(f"任务失败，返回错误 {returncode}")
         self.set_sensitive(True)
 
 win = MainWindow()

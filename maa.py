@@ -39,7 +39,6 @@ def start_tasks(tasks, config, output_callback, finish_callback):
     task_core_code = "\n".join(map(lambda task: f"asst.append_task('{task.type}', {repr(task.config)})", tasks))
     task_code = f"""
 import json
-import pathlib
 import time
 import sys
 
@@ -51,7 +50,7 @@ from asst.updater import Updater
 
 path = '{maa_core}'
 
-Updater(path, Version.Stable).update()
+# Updater(path, Version.Stable).update()
 
 @Asst.CallBackType
 def my_callback(msg, details, arg):
@@ -82,5 +81,4 @@ while asst.running():
       output_callback(output.strip())
       if process.poll() is not None:
           break
-    print(f"returncode={process.returncode}")
-    finish_callback()
+    finish_callback(process.returncode)

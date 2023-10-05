@@ -9,7 +9,7 @@ class MallConfigBox(Gtk.Box):
         grid.set_row_spacing(5)
 
         # shopping
-        self.shopping_check = Gtk.CheckButton(label="是否购物")
+        self.shopping_check = Gtk.CheckButton(label="购买物品")
         self.shopping_check.set_active(config.get("shopping", True))
         grid.attach(self.shopping_check, 0, 0, 2, 1)
 
@@ -38,7 +38,18 @@ class MallConfigBox(Gtk.Box):
         self.force_shopping_check.set_active(config.get("force_shopping_if_credit_full", True))
         grid.attach(self.force_shopping_check, 0, 3, 2, 1)
 
+        self.shopping_check.connect('toggled', self.update_sensitive)
+        self.update_sensitive(None)
+
         self.add(grid)
+
+    def update_sensitive(self, _):
+        shopping = self.shopping_check.get_active()
+        self.buy_first_label.set_sensitive(shopping)
+        self.buy_first_entry.set_sensitive(shopping)
+        self.blacklist_label.set_sensitive(shopping)
+        self.blacklist_entry.set_sensitive(shopping)
+        self.force_shopping_check.set_sensitive(shopping)
 
     def get_config(self):
         config = {

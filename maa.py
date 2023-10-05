@@ -31,7 +31,7 @@ else:
     result = subprocess.run(['python', ping_filepath], capture_output=True, text=True)
     return result.stdout.strip() == '连接成功'
 
-def start_tasks(tasks, config, output_callback, finish_callback):
+def start_tasks(tasks, config):
     maa_core = config['maa_core']
     adb_device = config['adb_device']
 
@@ -74,11 +74,4 @@ while asst.running():
     with open(task_filepath, 'w') as f:
         f.write(task_code)
 
-    process = subprocess.Popen(['python', task_filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    while True:
-      # 实时读取输出
-      output = process.stdout.readline().decode('utf-8')
-      output_callback(output.strip())
-      if process.poll() is not None:
-          break
-    finish_callback(process.returncode)
+    return subprocess.Popen(['python', task_filepath], stdout=subprocess.PIPE, stderr=subprocess.PIPE)

@@ -150,6 +150,10 @@ class MainWindow(Gtk.Window):
         configb.connect('activate', self.open_edit_config_page)
         filemenu.append(configb)
 
+        openstatus = Gtk.MenuItem(label="日志")
+        openstatus.connect('activate', self.open_status_dialog)
+        filemenu.append(openstatus)
+
         exitb = Gtk.MenuItem(label="退出")
         exitb.connect('activate', Gtk.main_quit)
         filemenu.append(exitb)
@@ -186,31 +190,33 @@ class MainWindow(Gtk.Window):
         self.button_box = Gtk.Box()
         innerbox.pack_start(self.button_box, False, False, 0)
 
-        button1 = Gtk.Button(label="添加")
-        button1.connect("clicked", self.create_new_task)
-        self.button_box.pack_start(button1, True, True, 0)
+        self.button1 = Gtk.Button(label="添加")
+        self.button1.connect("clicked", self.create_new_task)
+        self.button_box.pack_start(self.button1, True, True, 0)
 
-        button2 = Gtk.Button(label="编辑")
-        button2.connect("clicked", self.edit_task)
-        self.button_box.pack_start(button2, True, True, 0)
+        self.button2 = Gtk.Button(label="编辑")
+        self.button2.connect("clicked", self.edit_task)
+        self.button_box.pack_start(self.button2, True, True, 0)
 
-        button3 = Gtk.Button(label="上移")
-        button3.connect("clicked", self.move_task_up)
-        self.button_box.pack_start(button3, True, True, 0)
+        self.button3 = Gtk.Button(label="上移")
+        self.button3.connect("clicked", self.move_task_up)
+        self.button_box.pack_start(self.button3, True, True, 0)
 
-        button4 = Gtk.Button(label="下移")
-        button4.connect("clicked", self.move_task_down)
-        self.button_box.pack_start(button4, True, True, 0)
+        self.button4 = Gtk.Button(label="下移")
+        self.button4.connect("clicked", self.move_task_down)
+        self.button_box.pack_start(self.button4, True, True, 0)
 
-        button5 = Gtk.Button(label="删除")
-        button5.connect('clicked', self.remove_task)
-        self.button_box.pack_start(button5, True, True, 0)
+        self.button5 = Gtk.Button(label="删除")
+        self.button5.connect('clicked', self.remove_task)
+        self.button_box.pack_start(self.button5, True, True, 0)
 
-        button6 = Gtk.Button(label="开始")
-        button6.connect('clicked', self.start_tasks)
-        self.button_box.pack_start(button6, True, True, 0)
+        self.button6 = Gtk.Button(label="开始")
+        self.button6.connect('clicked', self.start_tasks)
+        self.button_box.pack_start(self.button6, True, True, 0)
 
         self.last_selected_row = None
+        self.status_dialog = None
+        self.process = None
 
         self.connect("destroy", Gtk.main_quit)
         self.show_all()
@@ -222,6 +228,12 @@ class MainWindow(Gtk.Window):
             self.config = dialog.config
             save_maa_gtk_config(self.config)
         dialog.destroy()
+
+    def open_status_dialog(self, _):
+        if self.status_dialog is not None:
+            self.status_dialog.destroy()
+        self.status_dialog = StatusDialog(self)
+        self.status_dialog.show()
 
     def open_github_page(self, _):
         webbrowser.open("https://github.com/swwind/maa-gtk")
@@ -314,14 +326,33 @@ class MainWindow(Gtk.Window):
         row.destroy()
 
     def start_tasks(self, _):
-        self.set_sensitive(False)
-        self.status_dialog = StatusDialog(self)
-        self.status_dialog.show()
+        if self.process is not None:
+            self.process.terminate()
+            return
+
+        self.listbox.set_sensitive(False)
+        self.button1.set_sensitive(False)
+        self.button2.set_sensitive(False)
+        self.button3.set_sensitive(False)
+        self.button4.set_sensitive(False)
+        self.button5.set_sensitive(False)
+        self.button6.set_label("结束")
+        self.open_status_dialog(None)
         self.status_dialog.add_text("任务开始")
-        thread = threading.Thread(target=start_tasks,
-                                  args=(self.tasks, self.config, self.on_running_output, self.on_running_finish))
+        self.process = start_tasks(self.tasks, self.config)
+
+        thread = threading.Thread(target=self.listen_process_output)
         thread.start()
 
+    def listen_process_output(self):
+        while True:
+            # 实时读取输出
+            output = self.process.stdout.readline().decode('utf-8')
+            self.on_running_output(output.strip())
+            if self.process.poll() is not None:
+                break
+        self.on_running_finish(self.process.returncode)
+        self.process = None
 
     def on_running_output(self, output):
         GLib.idle_add(self.on_running_output_in_main_thread, output)
@@ -335,7 +366,13 @@ class MainWindow(Gtk.Window):
             self.status_dialog.add_text(f"任务完成")
         else:
             self.status_dialog.add_text(f"任务失败，返回错误 {returncode}")
-        self.set_sensitive(True)
+        self.listbox.set_sensitive(True)
+        self.button1.set_sensitive(True)
+        self.button2.set_sensitive(True)
+        self.button3.set_sensitive(True)
+        self.button4.set_sensitive(True)
+        self.button5.set_sensitive(True)
+        self.button6.set_label("开始")
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)

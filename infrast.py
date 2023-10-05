@@ -79,8 +79,7 @@ class InfrastConfigBox(Gtk.Box):
         config = {
             "mode": int(self.mode_combobox.get_active_id()),
             "facility": [f.strip() for f in self.facility_entry.get_text().split(",")],
-            "drones": self.drones_entry.get_text(),
-            "times": self.times_spinbutton.get_value_as_int(),
+            "drones": self.drones_combo.get_active_id(),
             "threshold": self.threshold_scale.get_value(),
             "replenish": self.replenish_check.get_active(),
             "dorm_notstationed_enabled": self.dorm_notstationed_enabled_check.get_active(),

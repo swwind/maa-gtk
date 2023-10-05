@@ -74,7 +74,6 @@ class CreateTaskDialog(Gtk.Dialog):
 
     def on_row_selected(self, _, row):
         type = items[row.get_index()][1]
-        print(row.get_index(), type)
         self.component = None
 
         if type == "StartUp":
@@ -112,27 +111,123 @@ class CreateTaskDialog(Gtk.Dialog):
             self.name = self.name_entry.get_text()
             self.config = self.component.get_config()
 
+class Task:
+    def __init__(self, name, type, config):
+        self.name = name
+        self.type = type
+        self.config = config
+
 class MainWindow(Gtk.Window):
     def __init__(self):
         Gtk.Window.__init__(self, title="MAA GTK")
+        self.set_default_size(335, 518)
+        self.tasks = []  # 初始化任务列表
 
-        button = Gtk.Button(label="点击添加任务")
-        button.connect("clicked", self.create_new_task)
-        self.add(button)
+        vbox = Gtk.Box(orientation=Gtk.Orientation.VERTICAL, spacing=6)
+        vbox.set_border_width(10)
+        self.add(vbox)
+
+        # 创建一个 ListBox 来展示任务列表
+        self.listbox = Gtk.ListBox()
+        self.listbox.set_selection_mode(Gtk.SelectionMode.SINGLE)
+        vbox.pack_start(self.listbox, True, True, 0)
+
+        # 添加任务项到 ListBox
+        for task in self.tasks:
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(label=task.name)
+            row.add(label)
+            self.listbox.add(row)
+
+        # 创建一个按钮 Box
+        self.button_box = Gtk.Box()
+        vbox.pack_start(self.button_box, False, False, 0)
+
+        button1 = Gtk.Button(label="添加")
+        button1.connect("clicked", self.create_new_task)
+        self.button_box.pack_start(button1, True, True, 0)
+
+        button2 = Gtk.Button(label="编辑")
+        self.button_box.pack_start(button2, True, True, 0)
+
+        button3 = Gtk.Button(label="上移")
+        button3.connect("clicked", self.move_task_up)
+        self.button_box.pack_start(button3, True, True, 0)
+
+        button4 = Gtk.Button(label="下移")
+        button4.connect("clicked", self.move_task_down)
+        self.button_box.pack_start(button4, True, True, 0)
+
+        button5 = Gtk.Button(label="删除")
+        self.button_box.pack_start(button5, True, True, 0)
+
+        self.last_selected_row = None
 
     def create_new_task(self, _):
-        dialog = CreateTaskDialog(self)
+        dialog = CreateTaskDialog(self, name = f"任务 {len(self.tasks) + 1}")
         response = dialog.run()
 
         if response == Gtk.ResponseType.OK:
-            print('OK')
-            print(dialog.type)
-            print(dialog.name)
-            print(dialog.config)
+            task = Task(
+                name=dialog.name,
+                type=dialog.type,
+                config=dialog.config)
+            self.tasks.append(task)  # 将任务添加到列表中
+
+            # 在 ListBox 中添加新的任务项
+            row = Gtk.ListBoxRow()
+            label = Gtk.Label(label=task.name)
+            row.add(label)
+            self.listbox.add(row)
+
+            self.show_all()
+
         elif response == Gtk.ResponseType.CANCEL:
             print('Cancel')
 
         dialog.destroy()
+
+    def move_task_up(self, _):
+        # 实现将当前选中的任务提前的代码逻辑
+        row = self.listbox.get_selected_row() or self.last_selected_row
+
+        # 如果还没有选择，那么返回
+        if row is None:
+            return
+
+        # 如果当前选中的是第一个任务项，则无法再往前移动
+        index = row.get_index()
+        if index == 0:
+            return
+
+        # 将当前选中的任务项和它的前一个任务项交换位置
+        self.tasks[index], self.tasks[index-1] = self.tasks[index-1], self.tasks[index]
+
+        # 更新 ListBox 中的任务项顺序
+        self.listbox.remove(row)
+        self.listbox.insert(row, index-1)
+        self.last_selected_row = row
+
+    def move_task_down(self, _):
+        # 实现将当前选中的任务延后的代码逻辑
+        row = self.listbox.get_selected_row() or self.last_selected_row
+
+        # 如果还没有选择，那么返回
+        if row is None:
+            return
+
+        # 如果当前选中的是最后一个任务项，则无法再往后移动
+        index = row.get_index()
+        if index == len(self.tasks) - 1:
+            return
+
+        # 将当前选中的任务项和它的后一个任务项交换位置
+        self.tasks[index], self.tasks[index+1] = self.tasks[index+1], self.tasks[index]
+
+        # 更新 ListBox 中的任务项顺序
+        self.listbox.remove(row)
+        self.listbox.insert(row, index+1)
+        self.last_selected_row = row
 
 win = MainWindow()
 win.connect("destroy", Gtk.main_quit)
